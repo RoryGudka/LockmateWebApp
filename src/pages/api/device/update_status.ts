@@ -56,7 +56,18 @@ export default async function handler(
     });
 
     if (result && result.Count && result.Items && result.Items[0]) {
-      const mostRecentAction = result.Items[0].action;
+      const mostRecentActionItem = result.Items[0];
+      const action = mostRecentActionItem.action;
+
+      // Build response with action and any additional parameters
+      let response = action;
+      
+      // For change_wifi_network action, include SSID and password
+      if (action === "change_wifi_network") {
+        const networkId = mostRecentActionItem.networkId || "";
+        const networkPassword = mostRecentActionItem.networkPassword || "";
+        response = `${action}|${networkId}|${networkPassword}`;
+      }
 
       await Promise.all(
         result.Items.map(async (item) => {
@@ -66,7 +77,7 @@ export default async function handler(
           });
         }),
       );
-      return sendText(res, 200, mostRecentAction);
+      return sendText(res, 200, response);
     } else {
       return sendText(res, 200, `none`);
     }
