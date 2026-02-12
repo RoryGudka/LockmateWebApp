@@ -30,14 +30,16 @@ export const RoutingProvider: React.FC<Props> = ({ children }) => {
     if (!accessToken) {
       const credentials = await getCredentials();
       if (!credentials) {
-        return router.push("/login");
+        await router.push("/login");
+        return;
       } else {
         try {
           await login(credentials.username, credentials.password);
           await getLinkedDevices();
           return reroute();
         } catch (e) {
-          return router.push("/login");
+          await router.push("/login");
+          return;
         }
       }
     } else setAccessToken(accessToken);
@@ -45,20 +47,30 @@ export const RoutingProvider: React.FC<Props> = ({ children }) => {
     await getLinkedDevices();
 
     const devices = await getDevices();
-    if (!devices) return router.push("/device_select");
-    else setDevices(devices);
+    if (!devices) {
+      await router.push("/device_select");
+      return;
+    } else setDevices(devices);
 
     const device = await getDevice();
-    if (!device) return router.push("/device_select");
-    else setDevice(device);
+    if (!device) {
+      await router.push("/device_select");
+      return;
+    } else setDevice(device);
 
     const isConnectedToNetwork =
       new Date().getTime() - new Date(device.lastUpdateTimestamp).getTime() <
       300000;
-    if (!isConnectedToNetwork) return router.push("/device_select");
+    if (!isConnectedToNetwork) {
+      await router.push("/device_select");
+      return;
+    }
 
     const isCalibrated = device.isUnlockCalibrated && device.isLockCalibrated;
-    if (!isCalibrated) return router.push("/calibrate_unlocked");
+    if (!isCalibrated) {
+      await router.push("/calibrate_unlocked");
+      return;
+    }
 
     router.push("/home");
   };

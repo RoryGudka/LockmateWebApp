@@ -39,11 +39,24 @@ const DevicePasswordPage: React.FC = () => {
     }
   };
 
+  // Handle case when bleDevice is not available (SSR or initial render)
+  if (!bleDevice) {
+    return (
+      <Page>
+        <PageWrapper>
+          <BackButton text="Back" href="/device_select" />
+          <Title text="No device selected" />
+          <Body text="Please select a device first." />
+        </PageWrapper>
+      </Page>
+    );
+  }
+
   return (
     <Page>
       <PageWrapper>
         <BackButton text="Back" href="/device_select" />
-        <Title text={`Enter pairing password for "${bleDevice!.name}"`} />
+        <Title text={`Enter pairing password for "${bleDevice.name}"`} />
         <Body text="Enter the pairing password located in the package that your Lockmate device came in" />
         <Body
           text={`This password is device specific, and you cannot use on associated with another Lockmate device`}

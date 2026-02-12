@@ -1,20 +1,29 @@
-import { addLinkedAccount, addGuestAccount, removeUser, makeOwner, makeResident, updateGuestAccess, getStatus } from "../libs/server";
-import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 
+import {
+  addGuestAccount,
+  addLinkedAccount,
+  getStatus,
+  makeOwner,
+  makeResident,
+  removeUser,
+  updateGuestAccess,
+} from "../libs/server";
+import { useEffect, useState } from "react";
+
 import BackButton from "../components/BackButton";
+import DateTimePicker from "../components/DateTimePicker";
 import InlineMessage from "../components/InlineMessage";
 import Page from "../components/Page";
 import PageWrapper from "../components/PageWrapper";
+import Select from "../components/Select";
 import TextButton from "../components/TextButton";
 import TextField from "../components/TextField";
 import Title from "../components/Title";
-import Select from "../components/Select";
-import DateTimePicker from "../components/DateTimePicker";
+import { palette } from "../theme";
 import { useDevice } from "../context/DeviceContext";
 import { useToast } from "../components/ToastProvider";
 import { useUser } from "../context/UserContext";
-import { palette } from "../theme";
 
 type UserType = "resident" | "guest";
 
@@ -38,7 +47,11 @@ const ManageUsersPage: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<UserAction | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editScheduleOpen, setEditScheduleOpen] = useState(false);
-  const [editingGuest, setEditingGuest] = useState<{ email: string; startTime: string; expirationTime: string | null } | null>(null);
+  const [editingGuest, setEditingGuest] = useState<{
+    email: string;
+    startTime: string;
+    expirationTime: string | null;
+  } | null>(null);
 
   // Refresh device data on mount
   useEffect(() => {
@@ -161,21 +174,25 @@ const ManageUsersPage: React.FC = () => {
     }
   };
 
-  const handleUserClick = (email: string, isCurrentUser: boolean, isGuest: boolean) => {
+  const handleUserClick = (
+    email: string,
+    isCurrentUser: boolean,
+    isGuest: boolean,
+  ) => {
     setSelectedUser({ email, isOwner: isCurrentUser, isGuest });
     setDialogOpen(true);
   };
 
   const handleMakeOwner = async () => {
     if (!selectedUser || !device?.deviceId) return;
-    
+
     try {
       const response = await makeOwner(device.deviceId, selectedUser.email);
-      setDevice({ 
-        ...device, 
+      setDevice({
+        ...device,
         ownerId: response.ownerId,
         linkedUserIds: response.linkedUserIds,
-        guests: response.guests 
+        guests: response.guests,
       });
       showToast({
         title: "Ownership transferred",
@@ -186,7 +203,8 @@ const ManageUsersPage: React.FC = () => {
     } catch (e: any) {
       showToast({
         title: "Error",
-        description: e?.response?.data?.error || "Unable to transfer ownership.",
+        description:
+          e?.response?.data?.error || "Unable to transfer ownership.",
         tone: "error",
       });
     }
@@ -194,13 +212,13 @@ const ManageUsersPage: React.FC = () => {
 
   const handleMakeResident = async () => {
     if (!selectedUser || !device?.deviceId) return;
-    
+
     try {
       const response = await makeResident(device.deviceId, selectedUser.email);
-      setDevice({ 
-        ...device, 
+      setDevice({
+        ...device,
         linkedUserIds: response.linkedUserIds,
-        guests: response.guests 
+        guests: response.guests,
       });
       showToast({
         title: "User converted",
@@ -211,7 +229,8 @@ const ManageUsersPage: React.FC = () => {
     } catch (e: any) {
       showToast({
         title: "Error",
-        description: e?.response?.data?.error || "Unable to convert to resident.",
+        description:
+          e?.response?.data?.error || "Unable to convert to resident.",
         tone: "error",
       });
     }
@@ -219,14 +238,16 @@ const ManageUsersPage: React.FC = () => {
 
   const handleEditSchedule = async () => {
     if (!selectedUser) return;
-    const guest = device?.guests?.find((g: any) => g.email === selectedUser.email);
+    const guest = device?.guests?.find(
+      (g: any) => g.email === selectedUser.email,
+    );
     if (guest) {
       setEditingGuest(guest);
-      
+
       // Set form values based on current guest data
       setStartTimeOption("custom");
       setCustomStartTime(guest.startTime || "");
-      
+
       // Determine expiration option
       if (!guest.expirationTime) {
         setExpirationOption("none");
@@ -235,7 +256,7 @@ const ManageUsersPage: React.FC = () => {
         setExpirationOption("custom");
         setCustomExpirationTime(guest.expirationTime);
       }
-      
+
       setEditScheduleOpen(true);
     }
     setDialogOpen(false);
@@ -247,14 +268,14 @@ const ManageUsersPage: React.FC = () => {
     try {
       const startTime = getStartTime();
       const expirationTime = calculateExpirationTime(expirationOption);
-      
+
       const response = await updateGuestAccess(
         device.deviceId,
         editingGuest.email,
         startTime,
-        expirationTime
+        expirationTime,
       );
-      
+
       setDevice({ ...device, guests: response.guests });
       showToast({
         title: "Schedule updated",
@@ -274,13 +295,13 @@ const ManageUsersPage: React.FC = () => {
 
   const handleRemoveAccess = async () => {
     if (!selectedUser || !device?.deviceId) return;
-    
+
     try {
       const response = await removeUser(device.deviceId, selectedUser.email);
-      setDevice({ 
-        ...device, 
+      setDevice({
+        ...device,
         linkedUserIds: response.linkedUserIds,
-        guests: response.guests 
+        guests: response.guests,
       });
       showToast({
         title: "Access removed",
@@ -300,55 +321,61 @@ const ManageUsersPage: React.FC = () => {
   const linkedAccounts = device?.linkedUserIds || [];
   const guests = device?.guests || [];
   const ownerId = device?.ownerId;
-  
+
   // Determine current user's role
   const isCurrentUserOwner = userEmail === ownerId;
-  const isCurrentUserResident = linkedAccounts.includes(userEmail || '');
+  const isCurrentUserResident = linkedAccounts.includes(userEmail || "");
   const isCurrentUserGuest = guests.some((g: any) => g.email === userEmail);
-  
+
   console.log("Device:", device);
   console.log("Linked accounts:", linkedAccounts);
   console.log("Guests:", guests);
-  console.log("Current user role:", { isCurrentUserOwner, isCurrentUserResident, isCurrentUserGuest });
-  
+  console.log("Current user role:", {
+    isCurrentUserOwner,
+    isCurrentUserResident,
+    isCurrentUserGuest,
+  });
+
   // Helper to get guest status
   const getGuestStatus = (guest: any) => {
     const now = new Date();
     const startDate = new Date(guest.startTime);
-    const expirationDate = guest.expirationTime ? new Date(guest.expirationTime) : null;
-    
+    const expirationDate = guest.expirationTime
+      ? new Date(guest.expirationTime)
+      : null;
+
     if (startDate > now) {
-      return 'not-started';
+      return "not-started";
     }
     if (expirationDate && expirationDate < now) {
-      return 'expired';
+      return "expired";
     }
-    return 'active';
+    return "active";
   };
-  
+
   // Combine all users (residents and guests)
   const allUsers = [
-    ...linkedAccounts.map(email => ({ 
-      email, 
-      isGuest: false, 
+    ...linkedAccounts.map((email) => ({
+      email,
+      isGuest: false,
       isOwner: email === ownerId,
-      guestStatus: null 
+      guestStatus: null,
     })),
-    ...guests.map(guest => ({ 
-      email: guest.email, 
+    ...guests.map((guest) => ({
+      email: guest.email,
       isGuest: true,
       isOwner: false,
-      guestStatus: getGuestStatus(guest)
-    }))
+      guestStatus: getGuestStatus(guest),
+    })),
   ];
-  
+
   console.log("All users:", allUsers);
-  
+
   // Remove duplicates (prefer resident status over guest)
   const uniqueUsers = Array.from(
-    new Map(allUsers.map(user => [user.email, user])).values()
+    new Map(allUsers.map((user) => [user.email, user])).values(),
   );
-  
+
   // Sort users: Owner, Residents, Active Guests, Not Started Guests, Expired Guests
   uniqueUsers.sort((a, b) => {
     if (a.isOwner) return -1;
@@ -356,12 +383,12 @@ const ManageUsersPage: React.FC = () => {
     if (!a.isGuest && b.isGuest) return -1;
     if (a.isGuest && !b.isGuest) return 1;
     if (a.isGuest && b.isGuest) {
-      const statusOrder: any = { 'active': 1, 'not-started': 2, 'expired': 3 };
-      return statusOrder[a.guestStatus] - statusOrder[b.guestStatus];
+      const statusOrder: any = { active: 1, "not-started": 2, expired: 3 };
+      return statusOrder[a.guestStatus!] - statusOrder[b.guestStatus!];
     }
     return 0;
   });
-  
+
   console.log("Unique users:", uniqueUsers);
 
   return (
@@ -395,18 +422,18 @@ const ManageUsersPage: React.FC = () => {
               uniqueUsers.map((user, index) => {
                 const isCurrentUser = userEmail && user.email === userEmail;
                 const isGuest = user.isGuest;
-                
+
                 let statusLabel = "Resident";
                 let statusColor = palette.gray.darkest;
-                
+
                 if (user.isOwner) {
                   statusLabel = "Owner";
                   statusColor = palette.blue.main;
                 } else if (isGuest) {
-                  if (user.guestStatus === 'not-started') {
+                  if (user.guestStatus === "not-started") {
                     statusLabel = "Guest - Not started";
                     statusColor = palette.gray.darkest;
-                  } else if (user.guestStatus === 'expired') {
+                  } else if (user.guestStatus === "expired") {
                     statusLabel = "Guest - Expired";
                     statusColor = "#c00";
                   } else {
@@ -414,11 +441,13 @@ const ManageUsersPage: React.FC = () => {
                     statusColor = palette.gray.darkest;
                   }
                 }
-                
+
                 return (
                   <button
                     key={user.email}
-                    onClick={() => handleUserClick(user.email, !!isCurrentUser, isGuest)}
+                    onClick={() =>
+                      handleUserClick(user.email, !!isCurrentUser, isGuest)
+                    }
                     style={{
                       width: "100%",
                       display: "flex",
@@ -481,128 +510,126 @@ const ManageUsersPage: React.FC = () => {
 
         {/* Section: Add New User - Only for Owner and Residents */}
         {(isCurrentUserOwner || isCurrentUserResident) && (
-        <div style={{ marginTop: "32px", textAlign: "left" }}>
-          <h3
-            style={{
-              fontSize: "15px",
-              fontWeight: 600,
-              margin: 0,
-              marginBottom: "10px",
-              color: palette.text.main,
-              textAlign: "center",
-            }}
-          >
-            Add new user
-          </h3>
-
-          <div style={{ marginBottom: "12px" }}>
-            <Select
-              value={userType}
-              onChange={(value) => setUserType(value as UserType)}
-              options={[
-                { value: "resident", label: "Resident" },
-                { value: "guest", label: "Guest" },
-              ]}
-              label="User type"
-            />
-          </div>
-
-          <div style={{ marginTop: "12px" }}>
-            <label
+          <div style={{ marginTop: "32px", textAlign: "left" }}>
+            <h3
               style={{
-                display: "block",
-                fontSize: "13px",
+                fontSize: "15px",
                 fontWeight: 600,
-                marginBottom: "6px",
+                margin: 0,
+                marginBottom: "10px",
                 color: palette.text.main,
-                textAlign: "left",
+                textAlign: "center",
               }}
             >
-              Email address
-            </label>
-            <TextField
-              value={newEmail}
-              onChange={(e: any) => setNewEmail(e.target.value)}
-              placeholder="user@example.com"
-              onKeyDown={(event: any) => {
-                if (event.key === "Enter") handleAddAccount();
-              }}
-            />
-          </div>
+              Add new user
+            </h3>
 
-          {/* Guest Settings */}
-          {userType === "guest" && (
-            <div
-              style={{
-                marginTop: "20px",
-                background: "#fafafa",
-                borderRadius: "10px",
-                padding: "16px",
-                border: `1px solid ${palette.gray.dark}`,
-              }}
-            >
-              <div style={{ marginBottom: "14px" }}>
-                <Select
-                  value={startTimeOption}
-                  onChange={setStartTimeOption}
-                  options={[
-                    { value: "now", label: "Now" },
-                    { value: "custom", label: "Custom date & time" },
-                  ]}
-                  label="Access start time"
-                />
-              </div>
-
-              {startTimeOption === "custom" && (
-                <DateTimePicker
-                  value={customStartTime}
-                  onChange={setCustomStartTime}
-                  label="Custom start time"
-                />
-              )}
-
-              <div style={{ marginTop: "14px" }}>
-                <Select
-                  value={expirationOption}
-                  onChange={setExpirationOption}
-                  options={[
-                    { value: "none", label: "Never" },
-                    { value: "1hour", label: "In 1 hour" },
-                    { value: "1day", label: "In 1 day" },
-                    { value: "1week", label: "In 1 week" },
-                    { value: "1month", label: "In 1 month" },
-                    { value: "custom", label: "Custom date & time" },
-                  ]}
-                  label="Access expiration time"
-                />
-              </div>
-
-              {expirationOption === "custom" && (
-                <DateTimePicker
-                  value={customExpirationTime}
-                  onChange={setCustomExpirationTime}
-                  label="Custom expiration time"
-                  minDate={
-                    startTimeOption === "custom"
-                      ? customStartTime
-                      : undefined
-                  }
-                />
-              )}
+            <div style={{ marginBottom: "12px" }}>
+              <Select
+                value={userType}
+                onChange={(value) => setUserType(value as UserType)}
+                options={[
+                  { value: "resident", label: "Resident" },
+                  { value: "guest", label: "Guest" },
+                ]}
+                label="User type"
+              />
             </div>
-          )}
 
-          <InlineMessage text={accountError} tone="error" />
+            <div style={{ marginTop: "12px" }}>
+              <label
+                style={{
+                  display: "block",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  marginBottom: "6px",
+                  color: palette.text.main,
+                  textAlign: "left",
+                }}
+              >
+                Email address
+              </label>
+              <TextField
+                value={newEmail}
+                onChange={(e: any) => setNewEmail(e.target.value)}
+                placeholder="user@example.com"
+                onKeyDown={(event: any) => {
+                  if (event.key === "Enter") handleAddAccount();
+                }}
+              />
+            </div>
 
-          <div style={{ marginTop: "16px" }}>
-            <TextButton
-              text={userType === "resident" ? "Add resident" : "Add guest"}
-              onClick={handleAddAccount}
-              disabled={!newEmail}
-              variant="contained"
-            />
+            {/* Guest Settings */}
+            {userType === "guest" && (
+              <div
+                style={{
+                  marginTop: "20px",
+                  background: "#fafafa",
+                  borderRadius: "10px",
+                  padding: "16px",
+                  border: `1px solid ${palette.gray.dark}`,
+                }}
+              >
+                <div style={{ marginBottom: "14px" }}>
+                  <Select
+                    value={startTimeOption}
+                    onChange={setStartTimeOption}
+                    options={[
+                      { value: "now", label: "Now" },
+                      { value: "custom", label: "Custom date & time" },
+                    ]}
+                    label="Access start time"
+                  />
+                </div>
+
+                {startTimeOption === "custom" && (
+                  <DateTimePicker
+                    value={customStartTime}
+                    onChange={setCustomStartTime}
+                    label="Custom start time"
+                  />
+                )}
+
+                <div style={{ marginTop: "14px" }}>
+                  <Select
+                    value={expirationOption}
+                    onChange={setExpirationOption}
+                    options={[
+                      { value: "none", label: "Never" },
+                      { value: "1hour", label: "In 1 hour" },
+                      { value: "1day", label: "In 1 day" },
+                      { value: "1week", label: "In 1 week" },
+                      { value: "1month", label: "In 1 month" },
+                      { value: "custom", label: "Custom date & time" },
+                    ]}
+                    label="Access expiration time"
+                  />
+                </div>
+
+                {expirationOption === "custom" && (
+                  <DateTimePicker
+                    value={customExpirationTime}
+                    onChange={setCustomExpirationTime}
+                    label="Custom expiration time"
+                    minDate={
+                      startTimeOption === "custom" ? customStartTime : undefined
+                    }
+                  />
+                )}
+              </div>
+            )}
+
+            <InlineMessage text={accountError} tone="error" />
+
+            <div style={{ marginTop: "16px" }}>
+              <TextButton
+                text={userType === "resident" ? "Add resident" : "Add guest"}
+                onClick={handleAddAccount}
+                disabled={!newEmail}
+                variant="contained"
+              />
+            </div>
           </div>
-        </div>
         )}
 
         {/* User Actions Dialog */}
@@ -655,7 +682,9 @@ const ManageUsersPage: React.FC = () => {
                 {selectedUser?.email}
               </Dialog.Description>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+              >
                 {/* Make owner - Owner only, can't make yourself owner */}
                 {isCurrentUserOwner && !selectedUser?.isOwner && (
                   <button
@@ -684,7 +713,8 @@ const ManageUsersPage: React.FC = () => {
                 )}
 
                 {/* Make resident - Owner and Resident, for guests */}
-                {(isCurrentUserOwner || isCurrentUserResident) && selectedUser?.isGuest && (
+                {(isCurrentUserOwner || isCurrentUserResident) &&
+                  selectedUser?.isGuest && (
                     <button
                       onClick={handleMakeResident}
                       style={{
@@ -703,15 +733,17 @@ const ManageUsersPage: React.FC = () => {
                         e.currentTarget.style.backgroundColor = "#e8e8ec";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = palette.gray.main;
+                        e.currentTarget.style.backgroundColor =
+                          palette.gray.main;
                       }}
                     >
                       Make resident
                     </button>
-                )}
+                  )}
 
                 {/* Edit access schedule - Owner and Resident, for guests */}
-                {(isCurrentUserOwner || isCurrentUserResident) && selectedUser?.isGuest && (
+                {(isCurrentUserOwner || isCurrentUserResident) &&
+                  selectedUser?.isGuest && (
                     <button
                       onClick={handleEditSchedule}
                       style={{
@@ -730,26 +762,28 @@ const ManageUsersPage: React.FC = () => {
                         e.currentTarget.style.backgroundColor = "#e8e8ec";
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = palette.gray.main;
+                        e.currentTarget.style.backgroundColor =
+                          palette.gray.main;
                       }}
                     >
                       Edit access schedule
                     </button>
-                )}
+                  )}
 
                 {/* Remove access - Complex logic:
                     - Owner can remove residents and guests (but not themselves)
                     - Residents can remove guests (but not themselves)
                     - Anyone can remove themselves (except owner - they must transfer ownership first)
                 */}
-                {(
-                  // Owner removing others (residents or guests)
-                  (isCurrentUserOwner && !selectedUser?.isOwner) ||
+                {// Owner removing others (residents or guests)
+                ((isCurrentUserOwner && !selectedUser?.isOwner) ||
                   // Resident removing guests
-                  (isCurrentUserResident && selectedUser?.isGuest && selectedUser.email !== userEmail) ||
+                  (isCurrentUserResident &&
+                    selectedUser?.isGuest &&
+                    selectedUser.email !== userEmail) ||
                   // Anyone removing themselves (except owner)
-                  (selectedUser?.email === userEmail && !isCurrentUserOwner)
-                ) && (
+                  (selectedUser?.email === userEmail &&
+                    !isCurrentUserOwner)) && (
                   <button
                     onClick={handleRemoveAccess}
                     style={{
@@ -898,9 +932,7 @@ const ManageUsersPage: React.FC = () => {
                   onChange={setCustomExpirationTime}
                   label="Custom expiration time"
                   minDate={
-                    startTimeOption === "custom"
-                      ? customStartTime
-                      : undefined
+                    startTimeOption === "custom" ? customStartTime : undefined
                   }
                 />
               )}

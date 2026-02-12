@@ -9,6 +9,7 @@ export const palette = {
   },
   blue: {
     main: "#6c9ef9",
+    dark: "#4a7dd7",
   },
   alert: {
     main: "#f70f0f",

@@ -21,9 +21,6 @@ const Document = () => {
         <meta name="theme-color" content="#ffffff" />
         <meta name="msapplication-TileColor" content="#ffffff" />
         
-        {/* Viewport */}
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
-        
         {/* Font Preconnect */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link

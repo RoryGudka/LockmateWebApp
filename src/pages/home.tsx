@@ -11,8 +11,8 @@ import Page from "../components/Page";
 import PageWrapper from "../components/PageWrapper";
 import Title from "../components/Title";
 import { useDevice } from "../context/DeviceContext";
-import { useUser } from "../context/UserContext";
 import { useRouter } from "next/router";
+import { useUser } from "../context/UserContext";
 
 type ConfirmAction = "signout" | null;
 
@@ -74,19 +74,25 @@ const HomePage: React.FC = () => {
   console.log("Device guests:", device?.guests);
   console.log("Device linkedUserIds:", device?.linkedUserIds);
   console.log("Device ownerId:", device?.ownerId);
-  
-  const isGuest = device?.guests?.some((guest: any) => guest.email === userEmail);
+
+  const isGuest = device?.guests?.some(
+    (guest: any) => guest.email === userEmail,
+  );
   console.log("Is guest?", isGuest);
-  
+
   // Build menu items based on user role
   const menuItems = [
     {
       text: "Recalibrate Lockmate",
-      onClick: () => router.push("/calibrate_unlocked"),
+      onClick: () => {
+        router.push("/calibrate_unlocked");
+      },
     },
     {
       text: "Change WiFi connection",
-      onClick: () => router.push("/network_select"),
+      onClick: () => {
+        router.push("/network_select");
+      },
     },
   ];
 
@@ -110,10 +116,7 @@ const HomePage: React.FC = () => {
           text={`Your door is currently ${isLocked ? "locked" : "unlocked"}`}
         />
         <InlineMessage text={error} tone="error" />
-        <Menu
-          title="Device and account options"
-          items={menuItems}
-        />
+        <Menu title="Device and account options" items={menuItems} />
 
         <BatteryIndicator percent={100} />
       </PageWrapper>

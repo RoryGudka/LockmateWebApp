@@ -1,4 +1,6 @@
-﻿export interface ScanResult {
+﻿/// <reference types="@types/web-bluetooth" />
+
+export interface ScanResult {
   device: {
     deviceId: string;
     name?: string;
@@ -153,7 +155,7 @@ class WebBluetoothAdapter implements BluetoothAdapter {
       service,
       characteristic,
     );
-    await char.writeValueWithoutResponse(data);
+    await char.writeValueWithoutResponse(data.buffer as BufferSource);
   }
 
   async startNotifications(
