@@ -8,7 +8,7 @@ export interface Device {
   deviceId: string;
   availableNetworks: string[];
   connectedNetwork: string;
-  batteryStatus: number;
+  batteryStatus: "high" | "medium" | "low";
   isUnlockCalibrated: boolean;
   isLockCalibrated: boolean;
   isLocked: boolean;

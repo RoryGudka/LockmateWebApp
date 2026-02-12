@@ -164,7 +164,15 @@ const HomePage: React.FC = () => {
         <InlineMessage text={error} tone="error" />
         <Menu title="Device and account options" items={menuItems} />
 
-        <BatteryIndicator percent={100} />
+        <BatteryIndicator 
+          percent={
+            device?.batteryStatus === "high" 
+              ? 100 
+              : device?.batteryStatus === "medium" 
+              ? 15 
+              : 5
+          } 
+        />
       </PageWrapper>
       <BottomWrapper>
         <CircularButton

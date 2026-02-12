@@ -281,9 +281,8 @@ const ChangeWiFiPage: React.FC = () => {
             <TextField
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e: any) => setPassword(e.target.value)}
               placeholder="WiFi password"
-              label="Password"
             />
           </div>
 
@@ -313,7 +312,7 @@ const ChangeWiFiPage: React.FC = () => {
             style={{
               marginTop: "16px",
               padding: "12px 16px",
-              backgroundColor: palette.blue.light,
+              backgroundColor: "#e8f2ff",
               borderRadius: "8px",
               color: palette.blue.main,
               fontSize: "14px",
