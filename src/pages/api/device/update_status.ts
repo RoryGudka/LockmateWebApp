@@ -21,6 +21,7 @@ export default async function handler(
   const batteryStatus = req.query.battery_status as string;
   const isUnlockCalibrated = req.query.is_unlock_calibrated as string;
   const isLockCalibrated = req.query.is_lock_calibrated as string;
+  const connectedNetwork = req.query.connected_network as string;
 
   try {
     const device = await validateSecretKey(res, deviceId, secretKey);
@@ -30,12 +31,13 @@ export default async function handler(
       TableName: "LockmateDevices",
       Key: { deviceId },
       UpdateExpression:
-        "SET isLocked = :isLocked, batteryStatus = :batteryStatus, isUnlockCalibrated = :isUnlockCalibrated, isLockCalibrated = :isLockCalibrated, lastUpdateTimestamp = :timestamp",
+        "SET isLocked = :isLocked, batteryStatus = :batteryStatus, isUnlockCalibrated = :isUnlockCalibrated, isLockCalibrated = :isLockCalibrated, lastUpdateTimestamp = :timestamp, connectedNetwork = :connectedNetwork",
       ExpressionAttributeValues: {
         ":timestamp": new Date().toISOString(),
         ":isLocked": isLocked === "T",
         ":isUnlockCalibrated": isUnlockCalibrated === "T",
         ":isLockCalibrated": isLockCalibrated === "T",
+        ":connectedNetwork": connectedNetwork,
         ":batteryStatus":
           batteryStatus === "H"
             ? "high"
