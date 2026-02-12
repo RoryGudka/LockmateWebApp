@@ -137,7 +137,7 @@ export const calibrateUnlocked = async (deviceId: string) => {
         resolve(true);
       }
       i++;
-      if (i == 100) {
+      if (i == 15) {
         clearInterval(interval);
         reject(false);
       }
@@ -169,7 +169,7 @@ export const calibrateLocked = async (deviceId: string) => {
         resolve(true);
       }
       i++;
-      if (i == 100) {
+      if (i == 15) {
         clearInterval(interval);
         reject(false);
       }

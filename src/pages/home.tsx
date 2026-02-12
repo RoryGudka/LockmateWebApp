@@ -23,8 +23,16 @@ const HomePage: React.FC = () => {
   const [isLocked, setIsLocked] = useState(!!device?.isLocked);
   const [error, setError] = useState("");
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const lock = useLock();
   const unlock = useUnlock();
+
+  // Initial load - wait for user email and device data
+  useEffect(() => {
+    if (userEmail && device?.deviceId) {
+      setIsLoading(false);
+    }
+  }, [userEmail, device?.deviceId]);
 
   useEffect(() => {
     if (!device?.deviceId) return;
@@ -85,13 +93,13 @@ const HomePage: React.FC = () => {
     {
       text: "Recalibrate Lockmate",
       onClick: () => {
-        router.push("/calibrate_unlocked");
+        router.push("/calibrate_unlocked?recalibrate=true");
       },
     },
     {
       text: "Change WiFi connection",
       onClick: () => {
-        router.push("/network_select");
+        router.push("/change_wifi");
       },
     },
   ];
@@ -108,6 +116,44 @@ const HomePage: React.FC = () => {
     text: "Sign out",
     onClick: () => setConfirmAction("signout"),
   });
+
+  if (isLoading) {
+    return (
+      <Page>
+        <PageWrapper>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "60vh",
+            }}
+          >
+            <div
+              style={{
+                width: "48px",
+                height: "48px",
+                border: "4px solid #f3f3f3",
+                borderTop: "4px solid #007AFF",
+                borderRadius: "50%",
+                animation: "spin 1s linear infinite",
+              }}
+            />
+            <style jsx>{`
+              @keyframes spin {
+                0% {
+                  transform: rotate(0deg);
+                }
+                100% {
+                  transform: rotate(360deg);
+                }
+              }
+            `}</style>
+          </div>
+        </PageWrapper>
+      </Page>
+    );
+  }
 
   return (
     <Page>

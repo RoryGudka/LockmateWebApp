@@ -6,7 +6,7 @@ const Page: React.FC<ContainerProps> = ({ children }) => {
   return (
     <div
       style={{
-        minHeight: "100vh",
+        minHeight: "100dvh",
         position: "relative",
         display: "flex",
         flexDirection: "column",

@@ -7,6 +7,7 @@ import Menu from "../components/Menu";
 import Page from "../components/Page";
 import PageWrapper from "../components/PageWrapper";
 import Title from "../components/Title";
+import TextButton from "../components/TextButton";
 import { useBluetooth } from "../context/BluetoothContext";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -17,6 +18,7 @@ const DeviceSelectPage: React.FC = () => {
   const connectDevice = useConnectDevice();
   const { setBleDevice } = useBluetooth();
   const [error, setError] = useState("");
+  const [showScanning, setShowScanning] = useState(false);
 
   const handleConnect = async (bleDevice: BleDevice) => {
     try {
@@ -29,6 +31,33 @@ const DeviceSelectPage: React.FC = () => {
     }
   };
 
+  const handleAddDevice = () => {
+    setShowScanning(true);
+    startScanning();
+  };
+
+  // Show initial "no devices" view
+  if (!showScanning) {
+    return (
+      <Page>
+        <PageWrapper>
+          <Title text="No active Lockmate devices" />
+          <Body text="You either have no linked Lockmate devices on your account, or your device may have stopped responding." />
+          <Body text="If this is unexpected, try disconnecting and reconnecting your Lockmate device from your wall outlet." />
+          <Body text="To add a new device, make sure it's powered on and ready to pair, then tap the button below." />
+          <div style={{ marginTop: "24px" }}>
+            <TextButton
+              text="Add new Lockmate device"
+              onClick={handleAddDevice}
+              variant="contained"
+            />
+          </div>
+        </PageWrapper>
+      </Page>
+    );
+  }
+
+  // Show scanning view
   return (
     <Page>
       <PageWrapper>

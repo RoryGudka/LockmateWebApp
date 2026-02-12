@@ -17,8 +17,14 @@ export default async function handler(
 
   const deviceId = req.query.device_id as string;
   const secretKey = req.query.secret_key as string;
-  const availableNetworks =
-    (req.query.available_networks as string)?.split(",") || [];
+  const connectedNetwork = req.query.connected_network as string;
+  const availableNetworks = [
+    ...new Set(
+      (req.query.available_networks as string)
+        ?.split(",")
+        .filter((val) => val) || [],
+    ),
+  ];
 
   try {
     const device = await validateSecretKey(res, deviceId, secretKey);
@@ -28,9 +34,10 @@ export default async function handler(
       TableName: "LockmateDevices",
       Key: { deviceId },
       UpdateExpression:
-        "SET availableNetworks = :availableNetworks, lastUpdateTimestamp = :timestamp",
+        "SET connectedNetwork = :connectedNetwork, availableNetworks = :availableNetworks, lastUpdateTimestamp = :timestamp",
       ExpressionAttributeValues: {
         ":timestamp": new Date().toISOString(),
+        ":connectedNetwork": connectedNetwork,
         ":availableNetworks": availableNetworks,
       },
     });
