@@ -308,11 +308,34 @@ export function useConfirmDevicePassword() {
 }
 
 async function getNetworks(bleDevice: BleDevice) {
-  const { networks } = await sendAndWaitForResponse(bleDevice.id, {
+  const response = await sendAndWaitForResponse(bleDevice.id, {
     [BLE_PARAM.API]: BLE_API.GET_AVAILABLE_NETWORKS,
     [BLE_PARAM.PASSWORD]: bleDevice.password || "",
   });
-  return networks.split(",");
+  
+  console.log("Full response from device:", response);
+  
+  // Try different possible field names
+  const networksString = response.networks || response.NETWORKS || response.available_networks || "";
+  
+  if (!networksString) {
+    console.warn("No networks field found in response!");
+    return [];
+  }
+  
+  // FIRST decode the entire string, THEN split by comma
+  const decodedString = decodeURIComponent(networksString);
+  console.log("Decoded networks string:", decodedString);
+  
+  // Now split by comma and filter out empty strings
+  const networkList = decodedString
+    .split(",")
+    .map((network: string) => network.trim())
+    .filter((network: string) => network.length > 0);
+  
+  console.log("Final parsed network list:", networkList);
+  
+  return networkList;
 }
 
 export function useGetNetworks(bleDevice: BleDevice) {

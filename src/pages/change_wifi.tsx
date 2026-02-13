@@ -11,7 +11,6 @@ import TextButton from "../components/TextButton";
 import TextField from "../components/TextField";
 import InlineMessage from "../components/InlineMessage";
 import BackButton from "../components/BackButton";
-import ConfirmDialog from "../components/ConfirmDialog";
 import { ArrowBackOutline } from "../components/icons";
 import { palette } from "../theme";
 import { getStatus } from "../libs/server";
@@ -28,7 +27,6 @@ const ChangeWiFiPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isChanging, setIsChanging] = useState(false);
   const [error, setError] = useState("");
-  const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
@@ -121,8 +119,7 @@ const ChangeWiFiPage: React.FC = () => {
       setShowSuccess(true);
     } catch (err: any) {
       console.error("WiFi change error:", err);
-      setError(err.message || "Failed to change WiFi network. Please try again.");
-      setShowErrorDialog(true);
+      setError(err.message || "Failed to change WiFi network. Please check your password and try again.");
       setIsChanging(false);
     }
   };
@@ -223,22 +220,6 @@ const ChangeWiFiPage: React.FC = () => {
             `}</style>
           </div>
         </PageWrapper>
-        <ConfirmDialog
-          open={showErrorDialog}
-          title="Failed to change WiFi"
-          message={error || "The WiFi network change timed out. Please check your password and try again."}
-          confirmText="OK"
-          onConfirm={() => {
-            setShowErrorDialog(false);
-            setIsChanging(false);
-            setSelectedNetwork(null);
-          }}
-          onCancel={() => {
-            setShowErrorDialog(false);
-            setIsChanging(false);
-            setSelectedNetwork(null);
-          }}
-        />
       </Page>
     );
   }

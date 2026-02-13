@@ -25,14 +25,14 @@ const NetworkPasswordPage: React.FC = () => {
   const [error, setError] = useState("");
   const { bleDevice } = useBluetooth();
   const { network } = useNetwork();
-  const { userId } = useUser();
+  const { userId, userEmail } = useUser();
   const connectToNetwork = useConnectToNetwork();
   const requestAuthentication = useRequestAuthentication();
   const { setDevices, setDevice } = useDevice();
 
   const handleJoinNetwork = async () => {
     setError("");
-    if (!userId) {
+    if (!userEmail) {
       setError("User not logged in. Please log in first.");
       return router.push("/login");
     }
@@ -68,7 +68,7 @@ const NetworkPasswordPage: React.FC = () => {
     let authenticated = false;
     for (let i = 0; i < 5 && !authenticated; i++) {
       try {
-        authenticated = await requestAuthentication(bleDevice, userId);
+        authenticated = await requestAuthentication(bleDevice, userEmail!);
       } catch (e) {
         console.error("Auth attempt failed:", e);
       }
