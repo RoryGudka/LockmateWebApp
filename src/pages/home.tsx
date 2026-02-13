@@ -10,6 +10,7 @@ import Menu from "../components/Menu";
 import Page from "../components/Page";
 import PageWrapper from "../components/PageWrapper";
 import Title from "../components/Title";
+import { palette } from "../theme";
 import { useDevice } from "../context/DeviceContext";
 import { useRouter } from "next/router";
 import { useUser } from "../context/UserContext";
@@ -158,20 +159,42 @@ const HomePage: React.FC = () => {
   return (
     <Page>
       <PageWrapper>
-        <Title
-          text={`Your door is currently ${isLocked ? "locked" : "unlocked"}`}
-        />
-        <InlineMessage text={error} tone="error" />
+        <div style={{ position: "relative" }}>
+          {error && (
+            <div
+              role="alert"
+              style={{
+                position: "absolute",
+                top: "-64px",
+                left: "0",
+                right: "0",
+                padding: "10px 12px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                textAlign: "left",
+                backgroundColor: palette.alert.light,
+                color: palette.alert.main,
+                border: `1px solid ${palette.alert.main}`,
+                zIndex: 10,
+              }}
+            >
+              {error}
+            </div>
+          )}
+          <Title
+            text={`Your door is currently ${isLocked ? "locked" : "unlocked"}`}
+          />
+        </div>
         <Menu title="Device and account options" items={menuItems} />
 
-        <BatteryIndicator 
+        <BatteryIndicator
           percent={
-            device?.batteryStatus === "high" 
-              ? 100 
-              : device?.batteryStatus === "medium" 
-              ? 15 
-              : 5
-          } 
+            device?.batteryStatus === "high"
+              ? 100
+              : device?.batteryStatus === "medium"
+                ? 15
+                : 5
+          }
         />
       </PageWrapper>
       <BottomWrapper>

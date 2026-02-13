@@ -76,7 +76,7 @@ const ChangeWiFiPage: React.FC = () => {
           }
           
           attempts++;
-          if (attempts >= 15) {
+          if (attempts >= 20) {
             clearInterval(interval);
             reject(false);
           }
